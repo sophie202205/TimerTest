@@ -1,9 +1,12 @@
 package com.example.timertest;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -15,14 +18,16 @@ public class MainActivity extends AppCompatActivity {
 
     private Timer timer;
     private Task1 task1;
-    private TextView msg;
+    private TextView msgs;
     private int counter;
+    private UIhandler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        msg = findViewById(R.id.msg);
+        handler = new UIhandler();
+        msgs = findViewById(R.id.msg);
     }
 
     @Override
@@ -64,13 +69,39 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, Page2Activity.class);
         startActivity(intent);
     }
-
+    //週期任務(非在主序(main thread)下跑)
     public class Task1 extends TimerTask{
         @Override
         public void run() {
             //Log.v("brad", "OK");
             counter++;
-            msg.setText("" + counter); //直接設counter會是設定resource的ID
+           // msgs.setText("" + counter); //直接設counter會是設定resource的ID
+
+            //透過handler去設定ui會比較好
+            //Message mesg = new Message();
+            //Bundle data = new Bundle();
+            //data.putInt("counter", counter);
+            //mesg.setData(data);
+            //handler.sendMessage(mesg);
+
+            //使用what設定，更快速簡單
+            handler.sendEmptyMessage(0);
+        }
+    }
+    //os的那個
+    private class UIhandler extends Handler{
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+           // super.handleMessage(msg);
+
+            // 透過handler去設定ui會比較好
+           //int dateInt = msg.getData().getInt("counter");
+           //msgs.setText("" + dateInt);
+
+            //使用what設定，更快速簡單
+            if(msg.what == 0){
+                msgs.setText("" + counter);
+            }
         }
     }
 }
